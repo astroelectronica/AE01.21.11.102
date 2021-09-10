@@ -1,0 +1,41 @@
+//AE01.21.11.102
+//MCP4531-103
+//ARDUINO UNO R3
+//astroelectronic@
+
+//Schematic reference: AE01.21.11.101
+
+#include <Wire.h>//I2C LIBRARY
+
+byte AE021L001_P0W = 0;//VALUE OF WIPER0
+byte AE021L001_EDGE = 0;//0=RISE, 1=FALLING
+int AE021L001_CHAN = 0;//AD CHANNEL SELECTED
+int AE021L001_VALAN = 0;//VALUE OF AD CHANNEL
+
+void setup() {
+  Wire.begin(); //ENABLE I2C BUS
+  Serial.begin(9600);//SERIAL BAUD RATE
+}
+
+void loop() {
+  Wire.beginTransmission(byte(0x2E));//MCP4531 ADDRESS
+  Wire.write(byte(0x00));//WRITE INSTRUCTION
+  Wire.write(AE021L001_P0W);//SEND I2C WIPER0 VALUE
+  Wire.endTransmission();//STOP I2C
+
+if (AE021L001_EDGE == 0){//EDGE RISE?
+  AE021L001_P0W++;//INCREASE WIPER0
+  if (AE021L001_P0W == 127){//FINISH COUNT?
+    AE021L001_EDGE = 1;//EDGE FALLING
+  }
+}
+if (AE021L001_EDGE == 1){//EDGE FALLING?
+  AE021L001_P0W--;//DECREASE WIPER0
+  if (AE021L001_P0W == 0){//FINISH COUNT?
+    AE021L001_EDGE = 0;//EDGE RISE
+  }
+}
+  AE021L001_VALAN = analogRead(AE021L001_CHAN);//READ AD CHANNEL
+  Serial.println(AE021L001_VALAN);//SEND SERIAL AD VALUE 
+  delay(2);//DELAY TIME
+}
